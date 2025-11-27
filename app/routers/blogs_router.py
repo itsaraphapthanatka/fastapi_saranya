@@ -10,6 +10,9 @@ import shutil
 from pydantic import BaseModel
 from typing import List
 
+
+
+
 router = APIRouter(
     prefix="/blogs",
     tags=["blogs"]
@@ -73,35 +76,44 @@ def get_blog(blog_id: int, db: Session = Depends(get_db)):
 
 @router.put("/{blog_id}")
 def update_blog(
-        blog_id: int, 
-        title: str = None, 
-        content: str = None,
-        img: str = None,
-        blogsType: str = None,
-        createBy: str = None,
-        blogsStatus: str = None,
-        db: Session = Depends(get_db)
-    ):
+    blog_id: int,
+    title: str = Form(None),
+    content: str = Form(None),
+    blogsType: str = Form(None),
+    blogsStatus: str = Form(None),
+    file: UploadFile = File(None),  # <-- optional
+    db: Session = Depends(get_db)
+):
     blog = db.query(Blogs).filter(Blogs.id == blog_id).first()
     if not blog:
         raise HTTPException(status_code=404, detail="Blog not found")
-    
+
+    # อัปเดตข้อมูลที่มี
     if title:
         blog.title = title
     if content:
         blog.content = content
-    if img:
-        blog.img = img
     if blogsType:
         blog.blogsType = blogsType
-    if createBy:
-        blog.createBy = createBy
     if blogsStatus:
         blog.blogsStatus = blogsStatus
-    
+
+    # อัปโหลดไฟล์ถ้ามี
+    if file:
+        upload_dir = os.path.join(os.getcwd(), "app", "static", "blogImg")
+        os.makedirs(upload_dir, exist_ok=True)
+        timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
+        filename = f"{timestamp}_{file.filename}"
+        file_path = os.path.join(upload_dir, filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        blog.img = f"/static/blogImg/{filename}"
+
     db.commit()
     db.refresh(blog)
     return blog
+
+
 
 @router.delete("/{blog_id}")
 def delete_blog(blog_id: int, db: Session = Depends(get_db)):
