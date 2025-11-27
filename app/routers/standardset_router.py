@@ -4,6 +4,7 @@ from app.database import get_db
 from app.models.standardSet import Standardset
 from datetime import datetime
 from pydantic import BaseModel
+from typing import Optional
 
 router = APIRouter(
     prefix="/standardset",
@@ -14,6 +15,15 @@ class StandardSetCreate(BaseModel):
     standid: int
     standsetname: str
     standsetdesc: str
+
+
+
+class StandardSetUpdate(BaseModel):
+    standid: Optional[int] = None
+    standsetname: Optional[str] = None
+    standsetimg: Optional[str] = None
+    standsetdesc: Optional[str] = None
+    
 
 
 @router.get("/")
@@ -45,19 +55,23 @@ def get_standardsets_by_standid(standard_id: int, db: Session = Depends(get_db))
     return standardsets
 
 @router.put("/{standardset_id}")
-def update_standardset(standardset_id: int, name: str = None, standid: int = None, standsetname: str = None, standsetimg: str = None, db: Session = Depends(get_db)):
+def update_standardset(
+    standardset_id: int,
+    payload: StandardSetUpdate,
+    db: Session = Depends(get_db)
+):
     standardset = db.query(Standardset).filter(Standardset.id == standardset_id).first()
     if not standardset:
         raise HTTPException(status_code=404, detail="Standardset not found")
     
-    if name:
-        standardset.name = name
-    if standid:
-        standardset.standid = standid
-    if standsetname:
-        standardset.standsetname = standsetname
-    if standsetimg:
-        standardset.standsetimg = standsetimg
+    if payload.standid:
+        standardset.standid = payload.standid
+    if payload.standsetname:
+        standardset.standsetname = payload.standsetname
+    if payload.standsetimg:
+        standardset.standsetimg = payload.standsetimg
+    if payload.standsetdesc:
+        standardset.standsetdesc = payload.standsetdesc
     
     db.commit()
     db.refresh(standardset)

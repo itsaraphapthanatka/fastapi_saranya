@@ -26,7 +26,7 @@ def create_standard_set_detail(
         s_set_id: str = Form(""), 
         s_set_title: str = Form(""), 
         s_set_desc: str = Form(""),
-        s_set_chk_main: bool = Form(False),
+        s_set_chk_main: int = None,
         db: Session = Depends(get_db)
     ):
     upload_dir = os.path.join(os.getcwd(), "app", "static", "productdetailImg")
@@ -76,26 +76,38 @@ def update_standard_set_detail(
         standard_set_detail_id: int, 
         s_set_title: str = None,
         s_set_desc: str = None,
-        s_set_img: str = None, 
-        s_set_chk_main: bool = None,
+        s_set_img: UploadFile = File(...) , 
+        s_set_chk_main: int = None,
         db: Session = Depends(get_db)
     ):
-    standard_set_detail = db.query(StandardSetDetail).filter(StandardSetDetail.id == standard_set_detail_id).first()
+    print(f"qqqqqq: {s_set_chk_main}")
+    standard_set_detail = db.query(StandardSetDetail).filter(
+        StandardSetDetail.id == standard_set_detail_id
+    ).first()
+
     if not standard_set_detail:
         raise HTTPException(status_code=404, detail="Standard Set Detail not found")
-    
+
+    # ถ้าเลือก main ต้อง reset ตัวอื่นเป็น 0
+    if s_set_chk_main == 1:
+        db.query(StandardSetDetail).filter(
+            StandardSetDetail.s_set_id == standard_set_detail.s_set_id
+        ).update({ StandardSetDetail.s_set_chk_main: 0 })
+
+    # อัปเดตตัวที่เลือก
+    if s_set_chk_main is not None:
+        standard_set_detail.s_set_chk_main = s_set_chk_main
     if s_set_title is not None:
         standard_set_detail.s_set_title = s_set_title
     if s_set_desc is not None:
         standard_set_detail.s_set_desc = s_set_desc
     if s_set_img is not None:
         standard_set_detail.s_set_img = s_set_img
-    if s_set_chk_main is not None:
-        standard_set_detail.s_set_chk_main = s_set_chk_main
-    
+
     db.commit()
     db.refresh(standard_set_detail)
-    return standard_set_detail 
+    return standard_set_detail
+
 
 @router.delete("/{standard_set_detail_id}")
 def delete_standard_set_detail(standard_set_detail_id: int, db: Session = Depends(get_db)):
