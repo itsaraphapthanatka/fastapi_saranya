@@ -88,7 +88,7 @@ def update_blog(
     if not blog:
         raise HTTPException(status_code=404, detail="Blog not found")
 
-    # อัปเดตข้อมูลที่มี
+    # อัปเดตข้อมูลที่มี aaaaaa
     if title:
         blog.title = title
     if content:
