@@ -20,7 +20,9 @@ router = APIRouter(
 
 class BlogCreate(BaseModel):
     title: str
+    title_th: str = None
     content: str
+    content_th: str = None
     blogsType: str = None
     createBy: str = None
     blogsStatus: str = None
@@ -34,7 +36,9 @@ def get_blogs(db: Session = Depends(get_db)):
 @router.post("/")
 def create_blog(
     title: str = Form(...),
+    title_th: str = Form(None),
     content: str = Form(...),
+    content_th: str = Form(None),
     blogsType: str = Form(None),
     createBy: str = Form(None),
     blogsStatus: str = Form(None),
@@ -54,7 +58,9 @@ def create_blog(
     img_url = f"/static/blogImg/{filename}"
     blog = Blogs(
         title=title,
+        title_th=title_th,
         content=content,
+        content_th=content_th,
         img=img_url,
         blogsType=blogsType,
         createBy=createBy,
@@ -78,7 +84,9 @@ def get_blog(blog_id: int, db: Session = Depends(get_db)):
 def update_blog(
     blog_id: int,
     title: str = Form(None),
+    title_th: str = Form(None),
     content: str = Form(None),
+    content_th: str = Form(None),
     blogsType: str = Form(None),
     blogsStatus: str = Form(None),
     file: UploadFile = File(None),  # <-- optional
@@ -91,8 +99,12 @@ def update_blog(
     # อัปเดตข้อมูลที่มี aaaaaa
     if title:
         blog.title = title
+    if title_th:
+            blog.title_th = title_th
     if content:
         blog.content = content
+    if content_th:
+        blog.content_th = content_th
     if blogsType:
         blog.blogsType = blogsType
     if blogsStatus:

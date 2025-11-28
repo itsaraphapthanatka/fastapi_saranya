@@ -7,15 +7,17 @@ class Slide(Base):
     id = Column(Integer, primary_key=True, index=True)
     slide_image = Column(String(255), nullable=False)
     slide_desc = Column(Text, nullable=True)
+    slide_desc_th = Column(Text, nullable=True)
     position = Column(Integer, nullable=True)
 
     def __repr__(self):
-        return f"<Slide(id={self.id!r}, slide_image={self.slide_image!r}, slide_desc={self.slide_desc!r}, position={self.position!r})>"
+        return f"<Slide(id={self.id!r}, slide_image={self.slide_image!r}, slide_desc={self.slide_desc!r}, slide_desc_th={self.slide_desc_th!r}, position={self.position!r})>"
 
     def to_dict(self):
         return {
             "id": self.id,
             "slide_image": self.slide_image,
             "slide_desc": self.slide_desc,
+            "slide_desc_th": self.slide_desc_th,
             "position": self.position,
         }

@@ -15,8 +15,8 @@ def get_standard_products(db: Session = Depends(get_db)):
     return standard_products
 
 @router.post("/")
-def create_standard_product(name: str, db: Session = Depends(get_db)):
-    standard_product = StandardProduct(standname=name)
+def create_standard_product(name: str, name_th: str, db: Session = Depends(get_db)):
+    standard_product = StandardProduct(standname=name, standname_th=name_th)
     db.add(standard_product)
     db.commit()
     db.refresh(standard_product)
@@ -30,13 +30,15 @@ def get_standard_product(standard_product_id: int, db: Session = Depends(get_db)
     return standard_product
 
 @router.put("/{standard_product_id}")
-def update_standard_product(standard_product_id: int, name: str = None, db: Session = Depends(get_db)):
+def update_standard_product(standard_product_id: int, name: str = None, name_th: str = None, db: Session = Depends(get_db)):
     standard_product = db.query(StandardProduct).filter(StandardProduct.id == standard_product_id).first()
     if not standard_product:
         raise HTTPException(status_code=404, detail="Standard Product not found")
     
     if name:
         standard_product.standname = name
+    if name_th:
+        standard_product.standname_th = name_th
     
     db.commit()
     db.refresh(standard_product)

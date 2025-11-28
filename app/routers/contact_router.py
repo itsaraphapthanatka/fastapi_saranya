@@ -12,15 +12,18 @@ router = APIRouter(
 
 class ContactUpdate(BaseModel):
     factoryAddress: Optional[str] = None
+    factoryAddress_th: Optional[str] = None
     phone: Optional[str] = None
     email: Optional[str] = None
     workinghour: Optional[str] = None
+    workinghour_th: Optional[str] = None
     facebook: Optional[str] = None
     instagram: Optional[str] = None
     x_twitter: Optional[str] = None
     linkedin: Optional[str] = None
     line: Optional[str] = None
     tiktok: Optional[str] = None
+    wechat: Optional[str] = None
     googlemap: Optional[str] = None
     youtube: Optional[str] = None
 
@@ -32,30 +35,38 @@ def get_contacts(db: Session = Depends(get_db)):
 @router.post("/")
 def create_contact(
         factoryAddress: str,
+        factoryAddress_th: str,
         phone: str,
         email: str,
         workingHours: str,
+        workingHours_th: str,
         facebook: str,
-        instragram: str,
+        instagram: str,
         x_twitter: str,
         linkedin: str,
         line: str,
         tiktok: str,
+        wechat: str,
         googlemap: str,
+        youtube: str,
         db: Session = Depends(get_db)
     ):
     contact = Contact(
         factoryAddress=factoryAddress,
+        factoryAddress_th=factoryAddress_th,
         phone=phone,
         email=email,
         workingHours=workingHours,
+        workingHours_th=workingHours_th,
         facebook=facebook,
-        instragram=instragram,
+        instagram=instagram,
         x_twitter=x_twitter,
         linkedin=linkedin,
         line=line,
         tiktok=tiktok,
-        googlemap=googlemap
+        wechat=wechat,
+        googlemap=googlemap,
+        youtube=youtube
     )
     db.add(contact)
     db.commit()

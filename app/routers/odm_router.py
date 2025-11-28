@@ -15,13 +15,16 @@ router = APIRouter(
 
 class ODMCreate(BaseModel):
     name: str
+    name_th: str
 
 class ODMUpdate(BaseModel):
     name: str = None
+    name_th: str = None
 
 class ODMResponse(BaseModel):
     id: int
     name: str
+    name_th: str
     position: int
 
     class Config:
@@ -35,7 +38,7 @@ def get_odms(db: Session = Depends(get_db)):
 @router.post("/", response_model=ODMResponse)
 def create_odm(payload: ODMCreate, db: Session = Depends(get_db)):
     max_position = db.query(func.max(ODM.id)).scalar() or 0
-    odm = ODM(name=payload.name, position=max_position + 1)
+    odm = ODM(name=payload.name, name_th=payload.name_th, position=max_position + 1)
     db.add(odm)
     db.commit()
     db.refresh(odm)
@@ -62,13 +65,15 @@ def get_odm(odm_id: int, db: Session = Depends(get_db)):
     return odm
 
 @router.put("/{odm_id}")
-def update_odm(odm_id: int, name: str = None, db: Session = Depends(get_db)):
+def update_odm(odm_id: int, payload: ODMUpdate, db: Session = Depends(get_db)):
     odm = db.query(ODM).filter(ODM.id == odm_id).first()
     if not odm:
         raise HTTPException(status_code=404, detail="ODM not found")
     
-    if name:
-        odm.name = name
+    if payload.name:
+        odm.name = payload.name
+    if payload.name_th:
+        odm.name_th = payload.name_th   
     
     db.commit()
     db.refresh(odm)

@@ -15,13 +15,16 @@ router = APIRouter(
 
 class OEMCreate(BaseModel):
     name: str
+    name_th: str
 
 class OEMUpdate(BaseModel):
     name: str = None
+    name_th: str = None
 
 class OEMResponse(BaseModel):
     id: int
     name: str
+    name_th: str
     position: int
 
     class Config:
@@ -37,7 +40,7 @@ def get_oems(db: Session = Depends(get_db)):
 def create_oem(payload: OEMCreate, db: Session = Depends(get_db)):
     print("Creating OEM with name:", payload)
     max_position = db.query(func.max(OEM.id)).scalar() or 0
-    oem = OEM(name=payload.name, position=max_position + 1)
+    oem = OEM(name=payload.name, name_th=payload.name_th, position=max_position + 1)
     db.add(oem)
     db.commit()
     db.refresh(oem)
@@ -65,13 +68,15 @@ def reorder_oems(payload: dict, db: Session = Depends(get_db)):
     return {"detail": "ok"}
 
 @router.put("/{oem_id}")
-def update_oem(oem_id: int, name: str = None, db: Session = Depends(get_db)):
+def update_oem(oem_id: int, payload: OEMUpdate, db: Session = Depends(get_db)):
     oem = db.query(OEM).filter(OEM.id == oem_id).first()
     if not oem:
         raise HTTPException(status_code=404, detail="OEM not found")
     
-    if name:
-        oem.name = name
+    if payload.name:
+        oem.name = payload.name
+    if payload.name_th:
+        oem.name_th = payload.name_th   
     
     db.commit()
     db.refresh(oem)

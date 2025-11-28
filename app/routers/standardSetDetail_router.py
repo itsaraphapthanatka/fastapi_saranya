@@ -8,11 +8,34 @@ from fastapi import UploadFile, File, Form
 import os
 import shutil
 from pydantic import BaseModel
-
+from typing import Optional
 router = APIRouter(
     prefix="/standard_set_detail",
     tags=["standard_set_detail"]
 )
+
+class StandardSetDetailCreate(BaseModel):
+    s_id: int
+    s_set_id: str
+    s_set_title: str
+    s_set_title_th: str
+    s_set_img: str
+    s_set_desc: str
+    s_set_desc_th: str
+    s_set_chk_main: int
+    position: int
+
+
+class StandardSetDetailUpdate(BaseModel):
+    s_id: Optional[int] = None
+    s_set_id: Optional[str] = None
+    s_set_title: Optional[str] = None
+    s_set_title_th: Optional[str] = None
+    s_set_img: Optional[str] = None
+    s_set_desc: Optional[str] = None
+    s_set_desc_th: Optional[str] = None
+    s_set_chk_main: Optional[int] = None
+    position: Optional[int] = None
 
 @router.get("/")
 def get_standard_set_details(db: Session = Depends(get_db)):
@@ -21,14 +44,17 @@ def get_standard_set_details(db: Session = Depends(get_db)):
 
 @router.post("/")
 def create_standard_set_detail(
-        file: UploadFile = File(...), 
-        s_id: int = Form(...),
-        s_set_id: str = Form(""), 
-        s_set_title: str = Form(""), 
-        s_set_desc: str = Form(""),
-        s_set_chk_main: int = None,
-        db: Session = Depends(get_db)
-    ):
+    file: UploadFile = File(...),
+    s_id: int = Form(...),
+    s_set_id: str = Form(""),
+    s_set_title: str = Form(""),
+    s_set_title_th: str = Form(""),
+    s_set_img: str = Form(""),
+    s_set_desc: str = Form(""),
+    s_set_desc_th: str = Form(""),
+    s_set_chk_main: int = Form(0),
+    db: Session = Depends(get_db)
+):
     upload_dir = os.path.join(os.getcwd(), "app", "static", "productdetailImg")
     os.makedirs(upload_dir, exist_ok=True)
     max_position = db.query(func.max(StandardSetDetail.position)).scalar() or 0
@@ -47,7 +73,9 @@ def create_standard_set_detail(
         s_set_img=img,
         s_set_id=s_set_id,
         s_set_title=s_set_title,
+        s_set_title_th=s_set_title_th,
         s_set_desc=s_set_desc,
+        s_set_desc_th=s_set_desc_th,
         s_set_chk_main=s_set_chk_main,
         position=max_position + 1
     )
@@ -75,8 +103,10 @@ def get_standard_set_detail(standard_set_detail_id: int, db: Session = Depends(g
 def update_standard_set_detail(
         standard_set_detail_id: int, 
         s_set_title: str = None,
-        s_set_desc: str = None,
+        s_set_title_th: str = None,
         s_set_img: UploadFile = File(...) , 
+        s_set_desc: str = None,
+        s_set_desc_th: str = None,
         s_set_chk_main: int = None,
         db: Session = Depends(get_db)
     ):
@@ -99,10 +129,14 @@ def update_standard_set_detail(
         standard_set_detail.s_set_chk_main = s_set_chk_main
     if s_set_title is not None:
         standard_set_detail.s_set_title = s_set_title
-    if s_set_desc is not None:
-        standard_set_detail.s_set_desc = s_set_desc
+    if s_set_title_th is not None:
+        standard_set_detail.s_set_title_th = s_set_title_th
     if s_set_img is not None:
         standard_set_detail.s_set_img = s_set_img
+    if s_set_desc is not None:
+        standard_set_detail.s_set_desc = s_set_desc
+    if s_set_desc_th is not None:
+        standard_set_detail.s_set_desc_th = s_set_desc_th
 
     db.commit()
     db.refresh(standard_set_detail)

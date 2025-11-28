@@ -17,44 +17,62 @@ router = APIRouter(
 
 class AboutUpdate(BaseModel):
     desc: Optional[str] = None
+    desc_th: Optional[str] = None
     founderName: Optional[str] = None
+    founderName_th: Optional[str] = None
     founderDesc: Optional[str] = None
+    founderDesc_th: Optional[str] = None
     founderImg: Optional[str] = None
     sec2Desc: Optional[str] = None
+    sec2Desc_th: Optional[str] = None
     sec2Img: Optional[str] = None
     sec3Desc: Optional[str] = None
+    sec3Desc_th: Optional[str] = None
     sec3img: Optional[str] = None
     sec3Experience: Optional[str] = None
     sec4Desc: Optional[str] = None
+    sec4Desc_th: Optional[str] = None
     sec4img: Optional[str] = None
 
 @router.post("/")
 def create_about(
         desc: str, 
+        desc_th: str = None,
         founderName: str = None,
+        founderName_th: str = None,
         founderDesc: str = None,
+        founderDesc_th: str = None,
         founderImg: str = None,
         sec2Desc: str = None,
+        sec2Desc_th: str = None,
         sec2Img: str = None,
         sec3Desc: str = None,
+        sec3Desc_th: str = None,
         sec3img: str = None,
         sec3Experience: str = None,
         sec4Desc: str = None,
+        sec4Desc_th: str = None,
         sec4img: str = None,
         db: Session = Depends(get_db)
     ):
     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     about = About(
-        Desc=desc,
+        desc=desc,
+        desc_th=desc_th,
         founderName=founderName,
+        founderName_th=founderName_th,
         founderDesc=founderDesc,
+        founderDesc_th=founderDesc_th,
         founderImg=founderImg,
         sec2Desc=sec2Desc,
+        sec2Desc_th=sec2Desc_th,
         sec2Img=sec2Img,
         sec3Desc=sec3Desc,
+        sec3Desc_th=sec3Desc_th,
         sec3img=sec3img,
         sec3Experience=sec3Experience,
         sec4Desc=sec4Desc,
+        sec4Desc_th=sec4Desc_th,
         sec4img=sec4img
         )
     db.add(about)
@@ -85,15 +103,21 @@ def update_about(
         raise HTTPException(status_code=404, detail="About section not found")
     
     existing_about.desc = about_update.desc or existing_about.Desc
+    existing_about.desc_th = about_update.desc_th or existing_about.Desc_th
     existing_about.founderName = about_update.founderName or existing_about.founderName
+    existing_about.founderName_th = about_update.founderName_th or existing_about.founderName_th
     existing_about.founderDesc = about_update.founderDesc or existing_about.founderDesc
+    existing_about.founderDesc_th = about_update.founderDesc_th or existing_about.founderDesc_th
     existing_about.founderImg = about_update.founderImg or existing_about.founderImg
     existing_about.sec2Desc = about_update.sec2Desc or existing_about.sec2Desc
+    existing_about.sec2Desc_th = about_update.sec2Desc_th or existing_about.sec2Desc_th
     existing_about.sec2Img = about_update.sec2Img or existing_about.sec2Img
-    existing_about.sec3Desc = about_update.sec3Desc or existing_about.sec3Desc
+    existing_about.sec3Desc = about_update.sec3Desc or existing_about.sec3Desc  
+    existing_about.sec3Desc_th = about_update.sec3Desc_th or existing_about.sec3Desc_th
     existing_about.sec3img = about_update.sec3img or existing_about.sec3img
     existing_about.sec3Experience = about_update.sec3Experience or existing_about.sec3Experience
     existing_about.sec4Desc = about_update.sec4Desc or existing_about.sec4Desc
+    existing_about.sec4Desc_th = about_update.sec4Desc_th or existing_about.sec4Desc_th
     existing_about.sec4img = about_update.sec4img or existing_about.sec4img
 
     db.commit()

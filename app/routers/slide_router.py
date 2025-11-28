@@ -18,12 +18,21 @@ router = APIRouter(
 class SlideCreate(BaseModel):
     slide_image: str
     slide_desc: str
+    slide_desc_th: str
+
+
+class SlideUpdate(BaseModel):
+    slide_image: str = None
+    slide_desc: str = None
+    slide_desc_th: str = None
+    position: int = None    
 
 # Pydantic model สำหรับ response
 class SlideResponse(BaseModel):
     id: int
     slide_image: str
     slide_desc: str
+    slide_desc_th: str
     position: int
 
     class Config:
@@ -40,6 +49,7 @@ def create_slide(slide: SlideCreate, db: Session = Depends(get_db)):
     db_slide = Slide(
         slide_image=slide.slide_image,
         slide_desc=slide.slide_desc,
+        slide_desc_th=slide.slide_desc_th,
         position=max_position + 1
     )
     db.add(db_slide)
@@ -49,7 +59,7 @@ def create_slide(slide: SlideCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/upload")
-def upload_slide(file: UploadFile = File(...), slide_desc: str = Form(""), db: Session = Depends(get_db)):
+def upload_slide(file: UploadFile = File(...), slide_desc: str = Form(""), slide_desc_th: str = Form(""), db: Session = Depends(get_db)):
     # ensure upload directory exists
     upload_dir = os.path.join(os.getcwd(), "app", "static", "slides")
     os.makedirs(upload_dir, exist_ok=True)
@@ -66,7 +76,7 @@ def upload_slide(file: UploadFile = File(...), slide_desc: str = Form(""), db: S
     # store a web-friendly path in the DB (serve /static/ with your web server)
     slide_image_url = f"/static/slides/{filename}"
     max_position = db.query(func.max(Slide.position)).scalar() or 0
-    slide = Slide(slide_image=slide_image_url, slide_desc=slide_desc, position=max_position + 1)
+    slide = Slide(slide_image=slide_image_url, slide_desc=slide_desc, slide_desc_th=slide_desc_th, position=max_position + 1)
     db.add(slide)
     db.commit()
     db.refresh(slide)
@@ -91,22 +101,42 @@ def get_slide(slide_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Slide not found")
     return slide
 
+from fastapi import APIRouter, Depends, Form, UploadFile, File, HTTPException
+from sqlalchemy.orm import Session
+
 @router.put("/{slide_id}")
-def update_slide(slide_id: int, slide_image: str = None, slide_desc: str = None, position: int = None,   db: Session = Depends(get_db)):
+def update_slide(
+    slide_id: int,
+    slide_desc: str = Form(None),
+    slide_desc_th: str = Form(None),
+    position: int = Form(None),
+    slide_image: UploadFile = File(None),
+    db: Session = Depends(get_db),
+):
     slide = db.query(Slide).filter(Slide.id == slide_id).first()
     if not slide:
         raise HTTPException(status_code=404, detail="Slide not found")
-    
-    if slide_image:
-        slide.slide_image = slide_image
-    if slide_desc:
+
+    # update fields
+    if slide_desc is not None:
         slide.slide_desc = slide_desc
-    if position:
+
+    if slide_desc_th is not None:
+        slide.slide_desc_th = slide_desc_th
+
+    if position is not None:
         slide.position = position
-    
+
+    # update file
+    if slide_image:
+        # ต้องจัดการ save ไฟล์ตามที่คุณต้องการ เช่น เก็บชื่อไฟล์หรือ path
+        slide.slide_image = slide_image.filename
+
     db.commit()
     db.refresh(slide)
+
     return slide
+
 
 @router.delete("/{slide_id}")
 def delete_slide(slide_id: int, db: Session = Depends(get_db)):

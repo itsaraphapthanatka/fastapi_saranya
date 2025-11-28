@@ -6,7 +6,9 @@ class Blogs(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255), nullable=False)
+    title_th = Column(String(255), nullable=True)
     content = Column(Text, nullable=False)
+    content_th = Column(Text, nullable=True)
     img = Column(String(255), nullable=True)
     blogsType = Column(String(100), nullable=True)
     createBy = Column(String(100), nullable=True)
@@ -24,7 +26,9 @@ class Blogs(Base):
         return {
             "id": self.id,
             "title": self.title,
+            "title_th": self.title_th,
             "content": self.content,
+            "content_th": self.content_th,
             "img": self.img,
             "blogsType": self.blogsType,
             "createBy": self.createBy,

@@ -15,8 +15,8 @@ def get_collections(db: Session = Depends(get_db)):
     return collections
 
 @router.post("/")
-def create_collection(name: str, db: Session = Depends(get_db)):
-    collection = Collection(collec_name=name)
+def create_collection(name: str, name_th: str = None, db: Session = Depends(get_db)):
+    collection = Collection(collec_name=name, collec_name_th=name_th)
     db.add(collection)
     db.commit()
     db.refresh(collection)
@@ -30,13 +30,15 @@ def get_collection(collection_id: int, db: Session = Depends(get_db)):
     return collection
 
 @router.put("/{collection_id}")
-def update_collection(collection_id: int, name: str = None, db: Session = Depends(get_db)):
+def update_collection(collection_id: int, name: str = None, name_th: str = None, db: Session = Depends(get_db)):
     collection = db.query(Collection).filter(Collection.id == collection_id).first()
     if not collection:
         raise HTTPException(status_code=404, detail="Collection not found")
     
     if name:
         collection.collec_name = name
+    if name_th:
+        collection.collec_name_th = name_th 
     
     db.commit()
     db.refresh(collection)
