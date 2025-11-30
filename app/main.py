@@ -28,7 +28,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],     # หรือ ระบุ origin ก็ได้
+    allow_origins=["https://saranyaclothing.com"],     # หรือ ระบุ origin ก็ได้
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
