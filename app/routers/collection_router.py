@@ -3,11 +3,17 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.collection import Collection
 from datetime import datetime
+from pydantic import BaseModel
 
 router = APIRouter(
     prefix="/collection",
     tags=["collection"]
 )
+
+class CollectionCreate(BaseModel):
+    name: str
+    name_th: str = None 
+
 
 @router.get("/")
 def get_collections(db: Session = Depends(get_db)):
@@ -15,8 +21,8 @@ def get_collections(db: Session = Depends(get_db)):
     return collections
 
 @router.post("/")
-def create_collection(name: str, name_th: str = None, db: Session = Depends(get_db)):
-    collection = Collection(collec_name=name, collec_name_th=name_th)
+def create_collection(collection_create: CollectionCreate, db: Session = Depends(get_db)):
+    collection = Collection(collec_name=collection_create.name, collec_name_th=collection_create.name_th)
     db.add(collection)
     db.commit()
     db.refresh(collection)
@@ -30,15 +36,15 @@ def get_collection(collection_id: int, db: Session = Depends(get_db)):
     return collection
 
 @router.put("/{collection_id}")
-def update_collection(collection_id: int, name: str = None, name_th: str = None, db: Session = Depends(get_db)):
+def update_collection(collection_id: int, collection_update: CollectionCreate, db: Session = Depends(get_db)):
     collection = db.query(Collection).filter(Collection.id == collection_id).first()
     if not collection:
         raise HTTPException(status_code=404, detail="Collection not found")
     
-    if name:
-        collection.collec_name = name
-    if name_th:
-        collection.collec_name_th = name_th 
+    if collection_update.name:
+        collection.collec_name = collection_update.name
+    if collection_update.name_th:
+        collection.collec_name_th = collection_update.name_th 
     
     db.commit()
     db.refresh(collection)
