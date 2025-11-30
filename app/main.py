@@ -22,18 +22,13 @@ from fastapi.staticfiles import StaticFiles
 
 from fastapi.middleware.cors import CORSMiddleware
 
-# app = FastAPI()
-app = FastAPI(
-    docs_url="/docs",       # Swagger UI
-    redoc_url="/redoc",     # ReDoc
-    openapi_url="/openapi.json"
-)
+app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://saranyaclothing.com"],     # ระบุ origin ก็ได้
+    allow_origins=["*"],     # หรือ ระบุ origin ก็ได้
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
