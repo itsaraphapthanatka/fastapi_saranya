@@ -28,22 +28,11 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://saranyaclothing.com"],     # หรือ ระบุ origin ก็ได้
+    allow_origins=["*"],     # หรือ ระบุ origin ก็ได้
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# @app.middleware("http")
-# async def add_csp_header(request, call_next):
-#     response = await call_next(request)
-#     response.headers["Content-Security-Policy"] = (
-#         "default-src 'self'; "
-#         "style-src 'self'; "
-#         "script-src 'self'; "
-#         "img-src 'self'"
-#     )
-#     return response
 
 @app.get("/")
 def root():
