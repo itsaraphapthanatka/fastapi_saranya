@@ -11,6 +11,10 @@ router = APIRouter(
     tags=["users"]
 )
 
+class LoginInput(BaseModel):
+    email: str
+    password: str
+
 @router.get("/")
 def get_users(db: Session = Depends(get_db)):
     users = db.query(Users).all()
@@ -80,8 +84,9 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     return {"detail": "User deleted successfully"}
 
 @router.post("/login")
-def login_user(email: str, password: str, db: Session = Depends(get_db)):
-    user = db.query(Users).filter(Users.email == email, Users.upass == password).first()
+def login_user(login: LoginInput, db: Session = Depends(get_db)):
+    print(login.email, login.password)
+    user = db.query(Users).filter(Users.email == login.email, Users.upass == login.password).first()
     if not user:
         raise HTTPException(status_code=401, detail="Invalid username or password")
     return {"detail": "Login successful", "user_id": user.id}
