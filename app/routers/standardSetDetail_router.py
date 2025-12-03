@@ -14,6 +14,9 @@ router = APIRouter(
     tags=["standard_set_detail"]
 )
 
+class UpdateMain(BaseModel):
+    s_set_chk_main: int
+
 class StandardSetDetailCreate(BaseModel):
     s_id: int
     s_set_id: str
@@ -152,3 +155,24 @@ def delete_standard_set_detail(standard_set_detail_id: int, db: Session = Depend
     db.delete(standard_set_detail)
     db.commit()
     return {"detail": "Standard Set Detail deleted successfully"}
+
+
+@router.put("/update_check_main/{standard_set_detail_id}")
+def update_check_main(standard_set_detail_id: int, db: Session = Depends(get_db)):
+    # หา item ที่เลือกเป็น main
+    selected_item = db.query(StandardSetDetail).filter(StandardSetDetail.id == standard_set_detail_id).first()
+    if not selected_item:
+        raise HTTPException(status_code=404, detail="Standard Set Detail not found")
+
+    # set อื่น ๆ เป็น 0
+    db.query(StandardSetDetail).filter(
+        StandardSetDetail.id != standard_set_detail_id,
+        StandardSetDetail.s_set_id == selected_item.s_set_id  # ถ้า s_set_id เป็นตัว group
+    ).update({"s_set_chk_main": 0}, synchronize_session=False)
+
+    # set ตัวที่เลือกเป็น 1
+    selected_item.s_set_chk_main = 1
+
+    db.commit()
+    db.refresh(selected_item)
+    return selected_item
