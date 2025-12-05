@@ -18,11 +18,16 @@ from app.routers import contact_router
 from app.routers import customerRequest_router
 from app.routers import users_router
 from app.routers import slide_router
+from app.routers import review_router
+from app.routers import upload_router
 from fastapi.staticfiles import StaticFiles
-
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+# กำหนดขนาดไฟล์สูงสุด (เช่น 50MB)
+app.state.MAX_MULTIPART_BODY_SIZE = 50 * 1024 * 1024
+app.state.MAX_FILE_SIZE = 50 * 1024 * 1024
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
@@ -57,3 +62,5 @@ app.include_router(contact_router.router)
 app.include_router(customerRequest_router.router)
 app.include_router(users_router.router)
 app.include_router(slide_router.router)
+app.include_router(review_router.router)
+app.include_router(upload_router.router)
