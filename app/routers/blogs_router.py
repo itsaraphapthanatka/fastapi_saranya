@@ -89,37 +89,55 @@ def update_blog(
     content_th: str = Form(None),
     blogsType: str = Form(None),
     blogsStatus: str = Form(None),
-    file: UploadFile = File(None),  # <-- optional
+    file: UploadFile = File(None),  # รูปใหม่ (optional)
     db: Session = Depends(get_db)
 ):
     blog = db.query(Blogs).filter(Blogs.id == blog_id).first()
     if not blog:
         raise HTTPException(status_code=404, detail="Blog not found")
 
-    # อัปเดตข้อมูลที่มี aaaaaa
-    if title:
+    # -----------------------------
+    # 🔥 อัปเดตข้อมูล (ถ้ามี)
+    # -----------------------------
+    if title is not None:
         blog.title = title
-    if title_th:
-            blog.title_th = title_th
-    if content:
+    if title_th is not None:
+        blog.title_th = title_th
+    if content is not None:
         blog.content = content
-    if content_th:
+    if content_th is not None:
         blog.content_th = content_th
-    if blogsType:
+    if blogsType is not None:
         blog.blogsType = blogsType
-    if blogsStatus:
+    if blogsStatus is not None:
         blog.blogsStatus = blogsStatus
 
-    # อัปโหลดไฟล์ถ้ามี
+    # -----------------------------
+    # 🔥 ถ้ามีการอัปโหลดไฟล์ใหม่
+    # -----------------------------
     if file:
         upload_dir = os.path.join(os.getcwd(), "app", "static", "blogImg")
         os.makedirs(upload_dir, exist_ok=True)
+
+        # ลบไฟล์เก่า
+        if blog.img:
+            old_image_path = os.path.join(os.getcwd(), "app", blog.img.lstrip("/"))
+            if os.path.exists(old_image_path):
+                os.remove(old_image_path)
+
+        # เซฟรูปใหม่
         timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
         filename = f"{timestamp}_{file.filename}"
         file_path = os.path.join(upload_dir, filename)
+
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
-        blog.img = f"/static/blogImg/{filename}"
+
+        blog.img = f"/static/blogImg/{filename}"  # อัปเดต path ใหม่
+
+    # -----------------------------
+    # 🔥 ถ้าไม่มีไฟล์ใหม่ → ไม่ต้องทำอะไร (ใช้รูปเดิม)
+    # -----------------------------
 
     db.commit()
     db.refresh(blog)
